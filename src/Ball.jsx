@@ -1,22 +1,65 @@
+import React from 'react';
 
-export default function Ball () {
-  const pi = Math.PI;
-  const canvas = this.refs.canvas;
-  const ctx = this.ctx;
-  const x = this.x;
-  const y = this.y;
-  const dx = this.dx;
-  const dy = this.dy;
-  const radius = this.ballRadius;
-  const that = this;
+export default class Ball extends React.Component {
+  constructor(props) {
+    super(props);
 
-  return {
-    draw() {
-      ctx.beginPath();
-      ctx.arc(x, y, radius, 0, pi*2);
-      ctx.fillStyle = "#0095DD";
-      ctx.fill();
-      ctx.closePath();
-    }
+    this.initialState = {
+      x: props.canvas.width/2,
+      y: props.canvas.height-30,
+      dx: 2,
+      dy: -2,
+      paddleX: ((props.canvas.width-75)/2)
+    };
+
+    this.radius = 10;
+    this.state = this.initialState;
+  }
+
+  reset() {
+    this.setState(this.initialState);
+  }
+
+  getRadius() {
+    return this.radius;
+  }
+
+  getPos() {
+    return {
+      x: this.state.x,
+      y: this.state.y,
+      dx: this.state.dx,
+      dy: this.state.dy
+    };
+  }
+  
+  reverseX() {
+    this.setState({ dx: -this.state.dx });
+  }
+
+  reverseY() {
+    this.setState({ dy: -this.state.dy });
+  }
+
+  draw() {
+    const { canvas, ctx, colour } = this.props;
+
+    let { x, y, dx, dy, paddleX } = this.state;
+
+    ctx.beginPath();
+    ctx.arc(x, y, this.radius, 0, Math.PI*2);
+    ctx.fillStyle = colour;
+    ctx.fill();
+    ctx.closePath();
+
+    this.setState({
+      x: (x + dx),
+      y: (y + dy)
+    });
+  }
+
+  render() {
+
+    return null;
   }
 }

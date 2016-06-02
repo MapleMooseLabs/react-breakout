@@ -1,44 +1,89 @@
+import React from 'react';
 
-export default function BrickField () {
-  const that = this;
-  const ctx = this.ctx;
-  let { bricks } = this.state;
-  let brickRowCount = this.brickRowCount;
-  let brickColumnCount = this.brickColumnCount;
-  let brickWidth = this.brickWidth;
-  let brickHeight = this.brickHeight;
-  let brickPadding = this.brickPadding;
-  let brickOffsetTop = this.brickOffsetTop;
-  let brickOffsetLeft = this.brickOffsetLeft;
+import Brick from './Brick';
 
-  // let bricks = [];
-  for(let c = 0; c < brickColumnCount; c++) {
-    bricks[c] = [];
-    for(let r = 0; r < brickRowCount; r++) {
-      bricks[c][r] = { x: 0, y: 0, status: 1 };
+
+export default class BrickField extends React.Component {
+
+  constructor(props) {
+    super(props);
+
+    this.rowCount = 3;
+    this.columnCount = 5;
+    this.brickWidth = 75;
+    this.brickHeight = 20;
+    this.brickPadding = 10;
+    this.brickOffsetTop = 30;
+    this.brickOffsetLeft = 30;
+  }
+
+  componentDidUpdate() {
+    this.draw();
+  }
+
+  reset() {
+    for (let brick of this.getBricks()) {
+      brick.reset();
     }
   }
 
-  this.setState({ bricks: bricks });
-
-  return {
-    draw() {
-      for(let c = 0; c < brickColumnCount; c++) {
-        for(let r = 0; r < brickRowCount; r++) {
-          if (bricks[c][r].status === 1) {
-            let brickX = (c*(brickWidth+brickPadding))+brickOffsetLeft;
-            let brickY = (r*(brickHeight+brickPadding))+brickOffsetTop;
-            bricks[c][r].x = brickX;
-            bricks[c][r].y = brickY;
-            ctx.beginPath();
-            ctx.rect(brickX, brickY, brickWidth, brickHeight);
-            ctx.fillStyle = "#0095DD";
-            ctx.fill();
-            ctx.closePath();
-          }
+  getBricks() {
+    let bricks = [];
+    if (this.refs) {
+      for (let key in this.refs) {
+        let ref = this.refs[key];
+        if (Object.getPrototypeOf(ref).constructor.name === 'Brick') {
+          bricks.push(ref);
         }
       }
-      that.setState({ bricks: bricks });
-    } // draw()
+    }
+
+    return bricks;
+  }
+
+  hideBricks() {
+    let bricks = this.getBricks();
+
+    for (let brick of bricks) {
+      brick.setVisibility(false);
+    }
+  }
+
+  draw() {
+    let bricks = this.getBricks();
+
+    for (let brick of bricks) {
+      brick.draw();
+    }
+  }
+
+  renderBricks() {
+    let bricks = [];
+
+    for (let colIndex = 0; colIndex < this.columnCount; colIndex++) {
+      // bricks[colIndex] = [];
+      for (let rowIndex = 0; rowIndex < this.rowCount; rowIndex++) {
+        let brickX = (colIndex*(this.brickWidth+this.brickPadding))+this.brickOffsetLeft;
+        let brickY = (rowIndex*(this.brickHeight+this.brickPadding))+this.brickOffsetTop;
+        bricks.push((
+          <Brick ref={ 'brick-' + colIndex + '-' + rowIndex }
+            key={ colIndex + '-' + rowIndex }
+            x={ brickX }
+            y={ brickY }
+            width={ this.brickWidth }
+            height={ this.brickHeight }
+            { ...this.props } />
+        ));
+      } // for (rowIndex)
+    } // for (colIndex)
+    return bricks;
+  }
+
+  render() {
+    return (
+      <div ref="container">
+        { this.renderBricks() }
+      </div>
+    );
   }
 }
