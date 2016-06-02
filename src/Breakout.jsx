@@ -4,17 +4,16 @@ import ScoreBoard from './ScoreBoard';
 import BrickField from './BrickField';
 import Ball from './Ball';
 import Paddle from './Paddle';
+import MessageCenter from './MessageCenter';
 
 export default class Breakout extends React.Component {
 
   constructor(props) {
     super(props);
     this.state = {
-      rightPressed: false,
-      leftPressed: false,
-      paddleX: null,
-      bricks: null,
-      gameTimer: null
+      gameTimer: null,
+      running: false,
+      showStartMessage: false
     }
 
     this.ctx = null;
@@ -35,17 +34,53 @@ export default class Breakout extends React.Component {
   }
 
   componentDidMount() {
-    this.initGame();
+    this.setState({ showStartMessage: true });
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (!prevState.showStartMessage && this.state.showStartMessage) {
+      this.showStartMessage();
+    }
   }
 
   initGame() {
-    this.stopGame();
+    console.log('initGame()');
+    this.resetGame();
+    this.startGame();
+  }
+
+  showStartMessage() {
+    this.refs.messageCenter.show('Welcome to Breakout!', 'Start', this.initGame.bind(this));
+  }
+
+  startGame() {
+    let gameTimer = this.state.gameTimer;
+    if (gameTimer) {
+      clearInterval(gameTimer);
+      gameTimer = null;
+    }
+    gameTimer = setInterval(this.runGame.bind(this), 10);
+    this.setState({ gameTimer: gameTimer, running: true });
+  }
+
+  gameOver() {
+    this.newGame("Game over!");
+  }
+
+  newGame(message) {
+    if (message) {
+      alert(message.toUpperCase());
+    }
+
+    this.initGame();
+  }
+
+  resetGame() {
+    console.log('resetGame()');
     let { canvas, scoreBoard, ball, paddle, brickField } = this.refs;
     this.ctx = canvas.getContext('2d');
     this.x = canvas.width/2;
     this.y = canvas.height-30;
-
-    let gameTimer = this.state.gameTimer;
 
     if (scoreBoard) {
       scoreBoard.reset();
@@ -62,36 +97,6 @@ export default class Breakout extends React.Component {
     if (brickField) {
       brickField.reset();
     }
-
-    gameTimer = setInterval(this.runGame.bind(this), 10);
-    this.setState({ gameTimer: gameTimer });
-  }
-
-  stopGame() {
-    let gameTimer = this.state.gameTimer;
-    if (gameTimer) {
-      clearInterval(gameTimer);
-      gameTimer = null;
-    }
-    this.setState({
-      rightPressed: false,
-      leftPressed: false,
-      paddleX: null,
-      gameTimer: null
-    });
-
-  }
-
-  gameOver() {
-    this.newGame("Game over!");
-  }
-
-  newGame(message) {
-    if (message) {
-      alert(message.toUpperCase());
-    }
-
-    this.initGame();
   }
 
   // reset ball and paddle
@@ -131,15 +136,21 @@ export default class Breakout extends React.Component {
 
   runGame() {
     let ctx = this.ctx;
-    const { canvas, scoreBoard } = this.refs;
+    const running = this.state.running;
+    const { canvas, scoreBoard, messageCenter } = this.refs;
 
-    if (!scoreBoard.getLives()) {
-      this.gameOver();
-    } else {
+    if (running) {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       this.drawComponents();
-      this.detectBrickCollision();
-      this.detectWallCollision();
+
+      if (!scoreBoard.getLives()) {
+        this.gameOver();
+      } else {
+        this.detectBrickCollision();
+        this.detectWallCollision();
+      }
+    } else {
+      this.setState({ running: true });
     }
   }
 
@@ -205,9 +216,7 @@ export default class Breakout extends React.Component {
     let props = {
       canvas: this.refs.canvas,
       ctx: this.ctx,
-      colour: "#0095DD",
-      initGame: this.initGame.bind(this),
-      reset: this.initGame.bind(this)
+      colour: "#0095DD"
     }
 
     return props;
@@ -215,12 +224,13 @@ export default class Breakout extends React.Component {
 
   renderComponents() {
     let props = this.getComponentProps();
-
+    console.log(props);
     if (props.canvas) {
       let scoreBoard = <ScoreBoard ref="scoreBoard" { ...props } />;
       let paddle = <Paddle ref="paddle" { ...props } />;
       let ball = <Ball ref="ball" paddle={ paddle } { ...props } />;
       let brickField = <BrickField ref="brickField" { ...props } />;
+      let messageCenter = <MessageCenter ref="messageCenter" { ...props } />;
 
       return (
         <div ref="components">
@@ -228,6 +238,7 @@ export default class Breakout extends React.Component {
           { brickField }
           { ball }
           { paddle }
+          { messageCenter }
         </div>
       );
     }
@@ -247,6 +258,3 @@ export default class Breakout extends React.Component {
 
   }
 }
-
-// Breakout.prototype._paddle = Paddle;
-// Breakout.prototype._brickField = BrickField;

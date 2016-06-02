@@ -2,17 +2,6 @@ import React from 'react';
 
 
 export default class Paddle extends React.Component {
-  // const that = this;
-  // const state = this.state;
-  // const canvas = this.refs.canvas;
-  // const ctx = this.ctx;
-  // const paddleHeight = 10;
-  // const paddleWidth = this.paddleWidth;
-  //
-  // if (!state.paddleX) {
-  //   this.setState({ paddleX: ((canvas.width-paddleWidth)/2) });
-  // }
-
   constructor(props) {
     super(props);
     this.width = 75;
