@@ -1,0 +1,36 @@
+@import url('https://fonts.googleapis.com/css?family=Source+Sans+Pro');
+$bg-color: #333;
+$bl-color: #22BAD9;
+
+body {
+  font-family: 'Source Sans Pro', sans-serif;
+  font-size: 16px;
+  line-height: 1.7;
+  padding: 25px 50px;
+  margin: 0;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+  line-height: 1;
+  font-weight: normal;
+}
+
+:not(pre) > code {
+  padding: 2px;
+  font-size: 90%;
+  color: $bl-color;
+  border-radius: 2px;
+  background-color: #ddd;
+}
+
+.demo {
+  a {
+    color: inherit;
+    &:hover {
+      background-color: $bl-color;
+      color: white;
+      text-decoration: none;
+    }
+  }
+}
